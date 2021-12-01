@@ -34,7 +34,7 @@ public class Home extends JFrame{
 
         searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
         try {
-            System.out.println(searcher.search("iPhone 11 Pro").toString());
+            System.out.println(searcher.search("iPhone 5s").toString());
         }
         catch (Exception e) {
             System.err.println("Error during search: " + e);
