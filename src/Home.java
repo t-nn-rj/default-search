@@ -5,11 +5,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Home extends JFrame{
+    //GUI components
     private JPanel mainPanel;
     private JPanel searchPanel;
     private JPanel resultPanel;
     private JTextField searchTextBox;
     private JButton searchButton;
+
+    private static GalagoSearcher searcher;
 
     public Home() {
         super("Default Search Engine");
@@ -28,5 +31,7 @@ public class Home extends JFrame{
     public static void main(String[] args) {
         Home home = new Home();
         home.setVisible(true);
+
+        searcher = new GalagoSearcher("path/to/index");
     }
 }
