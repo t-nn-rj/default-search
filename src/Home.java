@@ -1,29 +1,32 @@
+import edu.stanford.nlp.ling.CoreAnnotations;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class Home {
-    private JButton searchButton;
+public class Home extends JFrame{
     private JPanel mainPanel;
-    private JTextArea userQuery;
+    private JPanel searchPanel;
+    private JPanel resultPanel;
+    private JTextField searchTextBox;
+    private JButton searchButton;
 
     public Home() {
-        searchButton.addActionListener(new ActionListener() {
+        super("Default Search Engine");
+        this.setContentPane(this.mainPanel);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.pack();
 
-            //method called when search button is clicked
+        searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, userQuery.getText());
+                System.out.print(searchTextBox.getText());
             }
         });
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Home");
-        frame.setContentPane(new Home().mainPanel);
-        frame.setSize(600, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
+        Home home = new Home();
+        home.setVisible(true);
     }
 }
