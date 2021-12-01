@@ -353,6 +353,7 @@ MigrationBackup/
 /shelf/
 /workspace.xml
 .idea/
+/out
 
 galago/
 data/

@@ -32,6 +32,12 @@ public class Home extends JFrame{
         Home home = new Home();
         home.setVisible(true);
 
-        searcher = new GalagoSearcher("path/to/index");
+        searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
+        try {
+            System.out.println(searcher.search("iPhone 11 Pro").toString());
+        }
+        catch (Exception e) {
+            System.err.println("Error during search: " + e);
+        }
     }
 }
