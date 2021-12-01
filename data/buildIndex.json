@@ -1,0 +1,8 @@
+{
+	"fileType": "trectext",
+	"indexPath": "./data/index/",
+	"inputPath": "./data/trecText.gz",
+	"tokenizer": {
+		"fields": ["docno", "head", "text"]
+	}
+}
