@@ -32,7 +32,7 @@ public class Home extends JFrame{
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    for (String asin : searcher.search("iPhone 5s")) {
+                    for (String asin : searcher.search(searchTextBox.getText())) {
                         System.out.println(objects.get(asin).title);
                         addToList(objects.get(asin).title);
                     }
