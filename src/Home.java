@@ -1,8 +1,11 @@
-import edu.stanford.nlp.ling.CoreAnnotations;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Home extends JFrame{
     //GUI components
@@ -13,6 +16,7 @@ public class Home extends JFrame{
     private JButton searchButton;
 
     private static GalagoSearcher searcher;
+    private HashMap<String, JSONObject> objects;
 
     public Home() {
         super("Default Search Engine");
@@ -26,6 +30,25 @@ public class Home extends JFrame{
                 System.out.print(searchTextBox.getText());
             }
         });
+
+        this.objects = new HashMap<>();
+//        Thread loadObjs = new Thread(() -> {
+            try {
+                File f = new File("./data/formattedCellData.json");
+                Scanner s = new Scanner(f);
+                while (s.hasNextLine()) {
+                    JSONObject o = new JSONObject(s.nextLine().trim());
+                    o.remove("related");
+                    this.objects.put(o.getString("asin"), o);
+                }
+                s.close();
+            }
+            catch (Exception e) {
+                System.err.println("Error during file reading: " + e);
+                e.printStackTrace();
+            }
+//        });
+//        loadObjs.start();
     }
 
     public static void main(String[] args) {
@@ -34,7 +57,9 @@ public class Home extends JFrame{
 
         searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
         try {
-            System.out.println(searcher.search("iPhone 5s").toString());
+            for (String asin : searcher.search("iPhone 5s")) {
+                System.out.println(home.objects.get(asin).toString());
+            }
         }
         catch (Exception e) {
             System.err.println("Error during search: " + e);
