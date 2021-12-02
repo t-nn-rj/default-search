@@ -1,4 +1,4 @@
-import org.json.JSONObject;
+import com.google.gson.Gson;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +16,7 @@ public class Home extends JFrame{
     private JButton searchButton;
 
     private static GalagoSearcher searcher;
-    private HashMap<String, JSONObject> objects;
+    private HashMap<String, SearchResult> objects;
 
     public Home() {
         super("Default Search Engine");
@@ -36,10 +36,10 @@ public class Home extends JFrame{
             try {
                 File f = new File("./data/formattedCellData.json");
                 Scanner s = new Scanner(f);
+                Gson parser = new Gson();
                 while (s.hasNextLine()) {
-                    JSONObject o = new JSONObject(s.nextLine().trim());
-                    o.remove("related");
-                    this.objects.put(o.getString("asin"), o);
+                    SearchResult sr = parser.fromJson(s.nextLine().trim(), SearchResult.class);
+                    this.objects.put(sr.asin, sr);
                 }
                 s.close();
             }
@@ -58,7 +58,7 @@ public class Home extends JFrame{
         searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
         try {
             for (String asin : searcher.search("iPhone 5s")) {
-                System.out.println(home.objects.get(asin).toString());
+                System.out.println(home.objects.get(asin).title);
             }
         }
         catch (Exception e) {

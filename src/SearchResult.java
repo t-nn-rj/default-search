@@ -1,7 +1,13 @@
+import java.util.Map;
+
 public class SearchResult {
-    public String url;
+    public String asin;
     public String title;
-    public String desciption;
+    public String description;
+    public String[][] categories;
+    public String imUrl;
+    public Map<String, Integer> salesRank;
+    public float price;
 
     public SearchResult(){
 
