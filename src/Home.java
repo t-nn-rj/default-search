@@ -14,6 +14,8 @@ public class Home extends JFrame{
     private JPanel resultPanel;
     private JTextField searchTextBox;
     private JButton searchButton;
+    private JList resultList;
+    private DefaultListModel resultListModel;
 
     private static GalagoSearcher searcher;
     private HashMap<String, SearchResult> objects;
@@ -23,11 +25,21 @@ public class Home extends JFrame{
         this.setContentPane(this.mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.pack();
+        resultListModel = new DefaultListModel();
+        resultList.setModel(resultListModel);
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.print(searchTextBox.getText());
+                try {
+                    for (String asin : searcher.search("iPhone 5s")) {
+                        System.out.println(objects.get(asin).title);
+                        addToList(objects.get(asin).title);
+                    }
+                }
+                catch (Exception ex) {
+                    System.err.println("Error during search: " + ex);
+                }
             }
         });
 
@@ -51,18 +63,14 @@ public class Home extends JFrame{
 //        loadObjs.start();
     }
 
+    private void addToList(String result){
+        resultListModel.addElement(result);
+    }
+
     public static void main(String[] args) {
         Home home = new Home();
         home.setVisible(true);
-
         searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
-        try {
-            for (String asin : searcher.search("iPhone 5s")) {
-                System.out.println(home.objects.get(asin).title);
-            }
-        }
-        catch (Exception e) {
-            System.err.println("Error during search: " + e);
-        }
+
     }
 }
