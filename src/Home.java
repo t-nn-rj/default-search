@@ -27,50 +27,59 @@ public class Home extends JFrame{
         this.pack();
         resultListModel = new DefaultListModel();
         resultList.setModel(resultListModel);
+        this.loadIndex();
 
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    for (String asin : searcher.search(searchTextBox.getText())) {
-                        System.out.println(objects.get(asin).title);
-                        addToList(objects.get(asin).title);
-                    }
-                }
-                catch (Exception ex) {
-                    System.err.println("Error during search: " + ex);
-                }
+                searchAndDisplay();
             }
         });
+    }
 
+    //Loads data from the index into memory
+    private void loadIndex(){
         this.objects = new HashMap<>();
 //        Thread loadObjs = new Thread(() -> {
-            try {
-                File f = new File("./data/formattedCellData.json");
-                Scanner s = new Scanner(f);
-                Gson parser = new Gson();
-                while (s.hasNextLine()) {
-                    SearchResult sr = parser.fromJson(s.nextLine().trim(), SearchResult.class);
-                    this.objects.put(sr.asin, sr);
-                }
-                s.close();
+        try {
+            File f = new File("./data/formattedCellData.json");
+            Scanner s = new Scanner(f);
+            Gson parser = new Gson();
+            while (s.hasNextLine()) {
+                SearchResult sr = parser.fromJson(s.nextLine().trim(), SearchResult.class);
+                this.objects.put(sr.asin, sr);
             }
-            catch (Exception e) {
-                System.err.println("Error during file reading: " + e);
-                e.printStackTrace();
-            }
+            s.close();
+        }
+        catch (Exception e) {
+            System.err.println("Error during file reading: " + e);
+            e.printStackTrace();
+        }
 //        });
 //        loadObjs.start();
     }
 
-    private void addToList(String result){
-        resultListModel.addElement(result);
+    //performs the search and displays the result
+    private void searchAndDisplay(){
+        try {
+            for (String asin : searcher.search(searchTextBox.getText())) {
+                if (resultListModel.getSize() < 10) {
+                    resultListModel.addElement(objects.get(asin).title);
+                }
+            }
+        }
+        catch (Exception ex) {
+            System.err.println("Error during search: " + ex);
+        }
+    }
+
+    private void clearList(){
+        resultListModel.clear();
     }
 
     public static void main(String[] args) {
         Home home = new Home();
         home.setVisible(true);
         searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
-
     }
 }
