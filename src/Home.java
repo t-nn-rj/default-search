@@ -22,7 +22,9 @@ public class Home extends JFrame{
     private DefaultListModel resultListModel3;
 
 
-    private static GalagoSearcher searcher;
+    private GalagoSearcher searcher1;
+    private GalagoSearcher searcher2;
+    private GalagoSearcher searcher3;
     private HashMap<String, SearchResult> objects;
 
     public Home() {
@@ -78,22 +80,22 @@ public class Home extends JFrame{
 
         try {
             //for model 1
-            for (String asin : searcher.search(searchTextBox.getText())) {
-                if (resultListModel1.getSize() < 10) {
+            for (String asin : searcher1.search(searchTextBox.getText())) {
+                if (resultListModel1.getSize() < 100) {
                     resultListModel1.addElement(objects.get(asin).title);
                 }
             }
 
             //for model 2
-            for (String asin : searcher.search(searchTextBox.getText())) {
-                if (resultListModel2.getSize() < 10) {
+            for (String asin : searcher2.search(searchTextBox.getText())) {
+                if (resultListModel2.getSize() < 100) {
                     resultListModel2.addElement(objects.get(asin).title);
                 }
             }
 
             //for model 3
-            for (String asin : searcher.search(searchTextBox.getText())) {
-                if (resultListModel3.getSize() < 10) {
+            for (String asin : searcher3.search(searchTextBox.getText())) {
+                if (resultListModel3.getSize() < 100) {
                     resultListModel3.addElement(objects.get(asin).title);
                 }
             }
@@ -112,6 +114,9 @@ public class Home extends JFrame{
     public static void main(String[] args) {
         Home home = new Home();
         home.setVisible(true);
-        searcher = new GalagoSearcher("./data/index", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
+        home.searcher1 = new GalagoSearcher("./data/index", "rdm");
+        home.searcher2 = new GalagoSearcher("./data/index", "sdm");
+        home.searcher3 = new GalagoSearcher("./data/index", "rm3");
+
     }
 }
