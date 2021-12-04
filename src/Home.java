@@ -11,11 +11,16 @@ public class Home extends JFrame{
     //GUI components
     private JPanel mainPanel;
     private JPanel searchPanel;
-    private JPanel resultPanel;
     private JTextField searchTextBox;
     private JButton searchButton;
-    private JList resultList;
-    private DefaultListModel resultListModel;
+    private JPanel resultPanel;
+    private JList resultList1;
+    private JList resultList2;
+    private JList resultList3;
+    private DefaultListModel resultListModel1;
+    private DefaultListModel resultListModel2;
+    private DefaultListModel resultListModel3;
+
 
     private static GalagoSearcher searcher;
     private HashMap<String, SearchResult> objects;
@@ -24,9 +29,16 @@ public class Home extends JFrame{
         super("Default Search Engine");
         this.setContentPane(this.mainPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.pack();
-        resultListModel = new DefaultListModel();
-        resultList.setModel(resultListModel);
+        this.setSize(1200, 600);
+
+        //set up the result lists
+        resultListModel1 = new DefaultListModel();
+        resultListModel2 = new DefaultListModel();
+        resultListModel3 = new DefaultListModel();
+        resultList1.setModel(resultListModel1);
+        resultList2.setModel(resultListModel2);
+        resultList3.setModel(resultListModel3);
+
         this.loadIndex();
 
         searchButton.addActionListener(new ActionListener() {
@@ -59,12 +71,30 @@ public class Home extends JFrame{
 //        loadObjs.start();
     }
 
-    //performs the search and displays the result
+    //performs the search and displays the results for the different models
     private void searchAndDisplay(){
+        //clear the result page.
+        clearLists();
+
         try {
+            //for model 1
             for (String asin : searcher.search(searchTextBox.getText())) {
-                if (resultListModel.getSize() < 10) {
-                    resultListModel.addElement(objects.get(asin).title);
+                if (resultListModel1.getSize() < 10) {
+                    resultListModel1.addElement(objects.get(asin).title);
+                }
+            }
+
+            //for model 2
+            for (String asin : searcher.search(searchTextBox.getText())) {
+                if (resultListModel2.getSize() < 10) {
+                    resultListModel2.addElement(objects.get(asin).title);
+                }
+            }
+
+            //for model 3
+            for (String asin : searcher.search(searchTextBox.getText())) {
+                if (resultListModel3.getSize() < 10) {
+                    resultListModel3.addElement(objects.get(asin).title);
                 }
             }
         }
@@ -73,8 +103,10 @@ public class Home extends JFrame{
         }
     }
 
-    private void clearList(){
-        resultListModel.clear();
+    private void clearLists(){
+        resultListModel1.clear();
+        resultListModel2.clear();
+        resultListModel3.clear();
     }
 
     public static void main(String[] args) {
