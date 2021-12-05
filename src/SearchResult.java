@@ -9,7 +9,9 @@ public class SearchResult {
     public Map<String, Integer> salesRank;
     public float price;
 
-    public SearchResult(){
+    public float relevance;
 
+    public SearchResult(){
+        relevance = 0;
     }
 }
