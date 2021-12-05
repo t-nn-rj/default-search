@@ -6,6 +6,7 @@ import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
 import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
+import org.lemurproject.galago.core.util.WordLists;
 import org.lemurproject.galago.utility.Parameters;
 
 import java.util.*;
@@ -21,19 +22,7 @@ public class GalagoSearcher {
         this.model = model;
         this.p = Parameters.create();
         p.set("index", path);
-        switch(model) {
-            case "rdm":
-            case "sdm":
-            case "rm3":
-                p.set("processingModel", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
-                break;
-//            case "rm3":
-//                p.set("relevanceModel", "org.lemurproject.galago.core.retrieval.prf.RelevanceModel3");
-//                p.set("fbOrigWeight", 0.7);
-//                p.set("fbDocs", 3);
-//                p.set("fbTerm", 3);
-//                break;
-        }
+        p.set("processingModel", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
         p.set("scorer", "bm25");
         p.set("casefold", true);
         p.set("requested", 100);
@@ -79,7 +68,10 @@ public class GalagoSearcher {
             float origQueryWeight = 0.7f;
             ArrayList<String> allWords = new ArrayList<>();
             ArrayList<Integer> allWeights = new ArrayList<>();
+            query = query.toLowerCase();
             String[] splitQuery = query.split(" ");
+
+            Set<String> stopwords = WordLists.getWordList("rmstop");
 
             DiskIndex di = new DiskIndex(pathToIndex);
             for (String docid : relevantDocs) {
@@ -88,29 +80,28 @@ public class GalagoSearcher {
                 TreeMap<Integer, String> mp = new TreeMap<>();
                 while (w.hasNext()) {
                     w.advance();
-                    if (mp.containsKey(w.value())) {
-                        mp.put(w.value(), mp.get(w.value()) +" "+ w.key());
-                    }
-                    else {
-                        mp.put(w.value(), mp.get(w.value()) + " " + w.key());
+                    if (!stopwords.contains(w.key()) && !query.contains(w.key())) {
+                        if (mp.containsKey(w.value())) {
+                            mp.put(w.value(), mp.get(w.value()) + " " + w.key());
+                        } else {
+                            mp.put(w.value(), w.key());
+                        }
                     }
                 }
                 int count = 0;
                 for (Integer key : mp.descendingKeySet()) {
                     String[] ss = mp.get(key).split(" ");
                     for (String s : ss) {
-                        if (!s.equals("null") && !query.contains(s)) {
-                            count++;
-                            int i = allWords.indexOf(s);
-                            if (i != -1) {
-                                allWeights.set(i, allWeights.get(i) + key);
-                            } else {
-                                allWords.add(s);
-                                allWeights.add(key);
-                            }
-                            if (count == N) {
-                                break;
-                            }
+                        count++;
+                        int i = allWords.indexOf(s);
+                        if (i != -1) {
+                            allWeights.set(i, allWeights.get(i) + key);
+                        } else {
+                            allWords.add(s);
+                            allWeights.add(key);
+                        }
+                        if (count == N) {
+                            break;
                         }
                     }
                     if (count == N) {
@@ -142,7 +133,7 @@ public class GalagoSearcher {
             }
             sb.append(")");
             System.out.println(sb.toString());
-            System.out.println("then");
+            System.out.println("becomes");
             return sb.toString();
         }
         catch (Exception e) {

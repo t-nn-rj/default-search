@@ -27,6 +27,7 @@ public class Home extends JFrame{
     private JTextField sdmField;
     private JButton rm3Button;
     private JTextField rm3Field;
+    private JButton clearFeedbackButton;
     private ListData resultListModel1;
     private ListData resultListModel2;
     private ListData resultListModel3;
@@ -105,6 +106,14 @@ public class Home extends JFrame{
             public void valueChanged(ListSelectionEvent e) {
                 Result rDialog = new Result(resultListModel3.getSearchResultAt(resultList3.getSelectedIndex()));
                 rDialog.setVisible(true);
+            }
+        });
+
+        clearFeedbackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearLists();
+                relevantDocs.clear();
             }
         });
     }
