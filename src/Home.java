@@ -6,7 +6,9 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 public class Home extends JFrame{
@@ -16,24 +18,26 @@ public class Home extends JFrame{
     private JTextField searchTextBox;
     private JButton searchButton;
     private JPanel resultPanel;
-    private JList resultList1;
-    private JList resultList2;
-    private JList resultList3;
+    private JList<String> resultList1;
+    private JList<String> resultList2;
+    private JList<String> resultList3;
     private JButton rdmButton;
     private JTextField rdmField;
     private JButton sdmButton;
     private JTextField sdmField;
     private JButton rm3Button;
     private JTextField rm3Field;
-    private DefaultListModel resultListModel1;
-    private DefaultListModel resultListModel2;
-    private DefaultListModel resultListModel3;
+    private ListData resultListModel1;
+    private ListData resultListModel2;
+    private ListData resultListModel3;
 
 
     private GalagoSearcher searcher1;
     private GalagoSearcher searcher2;
     private GalagoSearcher searcher3;
     private HashMap<String, SearchResult> objects;
+
+    public static HashSet<String> relevantDocs;
 
     public Home() {
         super("Default Search Engine");
@@ -42,13 +46,14 @@ public class Home extends JFrame{
         this.setSize(1200, 700);
 
         //set up the result lists
-        resultListModel1 = new DefaultListModel();
-        resultListModel2 = new DefaultListModel();
-        resultListModel3 = new DefaultListModel();
+        resultListModel1 = new ListData();
+        resultListModel2 = new ListData();
+        resultListModel3 = new ListData();
         resultList1.setModel(resultListModel1);
         resultList2.setModel(resultListModel2);
         resultList3.setModel(resultListModel3);
 
+        relevantDocs = new HashSet<>();
         this.loadIndex();
 
         searchButton.addActionListener(new ActionListener() {
@@ -82,24 +87,24 @@ public class Home extends JFrame{
         resultList1.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                System.out.println(resultList1.getSelectedIndex());
-                JOptionPane.showInputDialog(null, "This is where we would show an image " +
-                        "of the item and an input field to " +
-                        "set its relevance for the nDCG calculation");
+                Result rDialog = new Result(resultListModel1.getSearchResultAt(resultList1.getSelectedIndex()));
+                rDialog.setVisible(true);
             }
         });
 
         resultList2.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-
+                Result rDialog = new Result(resultListModel2.getSearchResultAt(resultList2.getSelectedIndex()));
+                rDialog.setVisible(true);
             }
         });
 
         resultList3.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-
+                Result rDialog = new Result(resultListModel3.getSearchResultAt(resultList3.getSelectedIndex()));
+                rDialog.setVisible(true);
             }
         });
     }
@@ -147,22 +152,22 @@ public class Home extends JFrame{
         try {
             //for model 1
             for (String asin : searcher1.search(searchTextBox.getText())) {
-                if (resultListModel1.getSize() < 10) {
-                    resultListModel1.addElement(objects.get(asin).title + " - " + objects.get(asin).relevance);
+                if (resultListModel1.getSize() < 25) {
+                    resultListModel1.addElement(objects.get(asin));
                 }
             }
 
             //for model 2
             for (String asin : searcher2.search(searchTextBox.getText())) {
-                if (resultListModel2.getSize() < 10) {
-                    resultListModel2.addElement(objects.get(asin).title);
+                if (resultListModel2.getSize() < 25) {
+                    resultListModel2.addElement(objects.get(asin));
                 }
             }
 
             //for model 3
             for (String asin : searcher3.search(searchTextBox.getText())) {
-                if (resultListModel3.getSize() < 10) {
-                    resultListModel3.addElement(objects.get(asin).title);
+                if (resultListModel3.getSize() < 25) {
+                    resultListModel3.addElement(objects.get(asin));
                 }
             }
         }
@@ -183,5 +188,35 @@ public class Home extends JFrame{
         home.searcher1 = new GalagoSearcher("./data/index", "rdm");
         home.searcher2 = new GalagoSearcher("./data/index", "sdm");
         home.searcher3 = new GalagoSearcher("./data/index", "rm3");
+    }
+}
+
+class ListData extends AbstractListModel {
+    ArrayList<SearchResult> sr = new ArrayList<>();
+
+    public ListData() {
+    }
+
+    public void addElement(SearchResult s) {
+        sr.add(s);
+        fireContentsChanged(this,0,getSize());
+    }
+
+    @Override
+    public int getSize() {
+        return sr.size();
+    }
+
+    @Override
+    public String getElementAt(int index) {
+        return sr.get(index).title;
+    }
+
+    public SearchResult getSearchResultAt(int index) {
+        return sr.get(index);
+    }
+
+    public void clear() {
+        sr = new ArrayList<>();
     }
 }
