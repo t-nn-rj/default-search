@@ -1,3 +1,6 @@
+import gnu.trove.iterator.TObjectIntIterator;
+import org.lemurproject.galago.core.index.disk.DiskIndex;
+import org.lemurproject.galago.core.parse.Document;
 import org.lemurproject.galago.core.retrieval.Retrieval;
 import org.lemurproject.galago.core.retrieval.RetrievalFactory;
 import org.lemurproject.galago.core.retrieval.ScoredDocument;
@@ -5,8 +8,7 @@ import org.lemurproject.galago.core.retrieval.query.Node;
 import org.lemurproject.galago.core.retrieval.query.StructuredQuery;
 import org.lemurproject.galago.utility.Parameters;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class GalagoSearcher {
     private String pathToIndex;
@@ -22,14 +24,15 @@ public class GalagoSearcher {
         switch(model) {
             case "rdm":
             case "sdm":
+            case "rm3":
                 p.set("processingModel", "org.lemurproject.galago.core.retrieval.processing.RankedDocumentModel");
                 break;
-            case "rm3":
-                p.set("relevanceModel", "org.lemurproject.galago.core.retrieval.prf.RelevanceModel3");
-                p.set("fbOrigWeight", 0.7);
-                p.set("fbDocs", 5);
-                p.set("fbTerms", 20);
-                break;
+//            case "rm3":
+//                p.set("relevanceModel", "org.lemurproject.galago.core.retrieval.prf.RelevanceModel3");
+//                p.set("fbOrigWeight", 0.7);
+//                p.set("fbDocs", 3);
+//                p.set("fbTerm", 3);
+//                break;
         }
         p.set("scorer", "bm25");
         p.set("casefold", true);
@@ -46,6 +49,8 @@ public class GalagoSearcher {
     public ArrayList<String> search(String query) throws Exception {
         ArrayList<String> result = new ArrayList<>();
 
+
+
         switch (model) {
             case "rdm":
                 query = "#combine("+query+")";
@@ -54,7 +59,7 @@ public class GalagoSearcher {
                 query = "#sdm("+query+")";
                 break;
             case "rm3":
-                query = "#combine( #rm("+String.join(") #rm(",query.split(" "))+") )";
+                query = getQueryWithRelevance(query, Home.relevantDocs);//"#combine( #rm("+String.join(") #rm(",query.split(" "))+") )";
                 break;
         }
         Node root = StructuredQuery.parse(query);
@@ -66,5 +71,83 @@ public class GalagoSearcher {
         }
 
         return result;
+    }
+
+    public String getQueryWithRelevance(String query, HashSet<String> relevantDocs) {
+        try {
+            int N = 15;
+            float origQueryWeight = 0.7f;
+            ArrayList<String> allWords = new ArrayList<>();
+            ArrayList<Integer> allWeights = new ArrayList<>();
+            String[] splitQuery = query.split(" ");
+
+            DiskIndex di = new DiskIndex(pathToIndex);
+            for (String docid : relevantDocs) {
+                Document d = di.getDocument(docid, new Document.DocumentComponents(true, true, true));
+                TObjectIntIterator<String> w = d.getBagOfWords().iterator();
+                TreeMap<Integer, String> mp = new TreeMap<>();
+                while (w.hasNext()) {
+                    w.advance();
+                    if (mp.containsKey(w.value())) {
+                        mp.put(w.value(), mp.get(w.value()) +" "+ w.key());
+                    }
+                    else {
+                        mp.put(w.value(), mp.get(w.value()) + " " + w.key());
+                    }
+                }
+                int count = 0;
+                for (Integer key : mp.descendingKeySet()) {
+                    String[] ss = mp.get(key).split(" ");
+                    for (String s : ss) {
+                        if (!s.equals("null") && !query.contains(s)) {
+                            count++;
+                            int i = allWords.indexOf(s);
+                            if (i != -1) {
+                                allWeights.set(i, allWeights.get(i) + key);
+                            } else {
+                                allWords.add(s);
+                                allWeights.add(key);
+                            }
+                            if (count == N) {
+                                break;
+                            }
+                        }
+                    }
+                    if (count == N) {
+                        break;
+                    }
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            if (allWords.size() == 0) {
+                origQueryWeight = 1.0f;
+            }
+            sb.append("#combine (");
+            for (String qs : splitQuery) {
+                sb.append("#bm25:w=");
+                sb.append(origQueryWeight / splitQuery.length);
+                sb.append("(");
+                sb.append(qs);
+                sb.append(") ");
+            }
+            float relevanceWeight = 1 - origQueryWeight;
+            float totalWeight = allWeights.stream().mapToInt(Integer::intValue).sum();
+            for (int i = 0; i < allWords.size(); i++) {
+                sb.append("#bm25:w=");
+                sb.append(relevanceWeight * allWeights.get(i) / totalWeight);
+                sb.append("(");
+                sb.append(allWords.get(i));
+                sb.append(") ");
+            }
+            sb.append(")");
+            System.out.println(sb.toString());
+            System.out.println("then");
+            return sb.toString();
+        }
+        catch (Exception e) {
+            System.err.println("Error opening index: " + e.toString());
+            return "";
+        }
     }
 }
