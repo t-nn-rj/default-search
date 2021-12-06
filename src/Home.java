@@ -67,21 +67,21 @@ public class Home extends JFrame{
         rdmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                rdmField.setText(doNDCG());
+                rdmField.setText(doNDCG(resultListModel1));
             }
         });
 
         sdmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                sdmField.setText(doNDCG(resultListModel2));
             }
         });
 
         rm3Button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                rm3Field.setText(doNDCG(resultListModel3));
             }
         });
 
@@ -118,17 +118,39 @@ public class Home extends JFrame{
         });
     }
 
-    //performs the ndcg calculation
-    private String doNDCG(){
+    //performs the ndcg@5 calculation
+    private String doNDCG(ListData list){
         //make sure there are results to work with
+        if (relevantDocs.isEmpty()){
+            return "0";
+        }
 
         //calculate DCG
+        int count = 2;
+        double DCG = 0;
+        for (SearchResult result : list.sr){
+            if (relevantDocs.contains(result.asin)){
+                DCG += 1.0 / (Math.log(count) / Math.log(2));
+            }
+            count++;
+            if (count == 7){
+                break;
+            }
+        }
 
         //calculate iDCG
+        int c = 2;
+        double iDCG = 0;
+        for (String asin : relevantDocs){
+            iDCG += 1.0 / (Math.log(count) / Math.log(2));
+            c++;
+            if (c == 7){
+                break;
+            }
+        }
 
-        //return DCG / iDCG
-
-        return "0.1223";
+        System.out.println(DCG + " / " + iDCG);
+        return "" + (DCG / iDCG);
     }
 
     //Loads data from the index into memory
