@@ -1,3 +1,4 @@
+import com.google.common.base.Stopwatch;
 import com.google.gson.Gson;
 
 import javax.swing.*;
@@ -6,10 +7,13 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 public class Home extends JFrame{
     //GUI components
@@ -28,6 +32,9 @@ public class Home extends JFrame{
     private JButton rm3Button;
     private JTextField rm3Field;
     private JButton clearFeedbackButton;
+    private JTextField rdmTimer;
+    private JTextField sdmTimer;
+    private JTextField rm3Timer;
     private ListData resultListModel1;
     private ListData resultListModel2;
     private ListData resultListModel3;
@@ -181,22 +188,34 @@ public class Home extends JFrame{
         clearLists();
 
         try {
-            //for model 1
-            for (String asin : searcher1.search(searchTextBox.getText())) {
+            //for model 1, rdm
+            Instant start = Instant.now();
+            ArrayList<String> list1 = searcher1.search(searchTextBox.getText());
+            Instant end = Instant.now();
+            rdmTimer.setText("" + Duration.between(start, end).getNano() / 1000000 + " milliseconds");
+            for (String asin : list1) {
                 if (resultListModel1.getSize() < 25) {
                     resultListModel1.addElement(objects.get(asin));
                 }
             }
 
-            //for model 2
-            for (String asin : searcher2.search(searchTextBox.getText())) {
+            //for model 2, sdm
+            start = Instant.now();
+            ArrayList<String> list2 = searcher2.search(searchTextBox.getText());
+            end = Instant.now();
+            sdmTimer.setText("" + Duration.between(start, end).getNano() / 1000000 + " milliseconds");
+            for (String asin : list2) {
                 if (resultListModel2.getSize() < 25) {
                     resultListModel2.addElement(objects.get(asin));
                 }
             }
 
-            //for model 3
-            for (String asin : searcher3.search(searchTextBox.getText())) {
+            //for model 3, rm3
+            start = Instant.now();
+            ArrayList<String> list3 = searcher3.search(searchTextBox.getText());
+            end = Instant.now();
+            rm3Timer.setText("" + Duration.between(start, end).getNano() / 1000000 + " milliseconds");
+            for (String asin : list3) {
                 if (resultListModel3.getSize() < 25) {
                     resultListModel3.addElement(objects.get(asin));
                 }
