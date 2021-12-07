@@ -142,7 +142,7 @@ public class Home extends JFrame{
         int c = 2;
         double iDCG = 0;
         for (String asin : relevantDocs){
-            iDCG += 1.0 / (Math.log(count) / Math.log(2));
+            iDCG += 1.0 / (Math.log(c) / Math.log(2));
             c++;
             if (c == 7){
                 break;
