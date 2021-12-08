@@ -140,7 +140,7 @@ public class Home extends JFrame{
                 DCG += 1.0 / (Math.log(count) / Math.log(2));
             }
             count++;
-            if (count == 7){
+            if (count == 25){
                 break;
             }
         }
@@ -151,7 +151,7 @@ public class Home extends JFrame{
         for (String asin : relevantDocs){
             iDCG += 1.0 / (Math.log(c) / Math.log(2));
             c++;
-            if (c == 7){
+            if (c == 25){
                 break;
             }
         }
